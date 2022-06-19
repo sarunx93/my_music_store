@@ -1,9 +1,9 @@
 const CustomError = require("../errors");
-const { isTokenValid } = require("../utils");
+const { isTokenValid } = require("../utils/jwt.js");
 
-//check if a user exists
 const authenticateUser = async (req, res, next) => {
   const token = req.signedCookies.token;
+  console.log(token);
   if (!token) {
     throw new CustomError.UnauthenticatedError("Authentication Failed");
   }
@@ -11,19 +11,20 @@ const authenticateUser = async (req, res, next) => {
     const { name, userId, role } = isTokenValid({ token });
     req.user = { name, userId, role };
     next();
-  } catch (error) {
+  } catch (err) {
     throw new CustomError.UnauthenticatedError("Authentication Failed");
   }
 };
 
-//check if a person is an admin
-const authorizePermissions = (...roles) => {
+const authorizedPermissions = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      throw new CustomError.UnauthorziedError("Unauthorized Account");
+      throw new CustomError.UnauthenticatedError(
+        "Unauthorized to access this route"
+      );
     }
     next();
   };
 };
 
-module.exports = { authenticateUser, authorizePermissions };
+module.exports = { authenticateUser, authorizedPermissions };

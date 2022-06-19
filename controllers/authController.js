@@ -1,7 +1,9 @@
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const CustomAPIError = require("../errors");
-const { createJWT, isTokenValid } = require("../utils/jwt.js");
+const { attachCookiesToResponse } = require("../utils/jwt.js");
+
+const createTokenUser = require("../utils/createTokenUser.js");
 require("dotenv").config();
 const register = async (req, res) => {
   const { email, name, password } = req.body;
@@ -13,22 +15,37 @@ const register = async (req, res) => {
   const isFirstAccount = (await User.countDocuments({})) === 0;
   const role = isFirstAccount ? "admin" : "user";
   const user = await User.create({ email, name, password, role });
-  const tokenUser = { name: user.name, userId: user._id, role: user.role };
-  const token = createJWT({ payload: tokenUser });
-  const oneDay = 1000 * 60 * 60 * 24;
-  res.cookie("token", token, {
-    httpOnly: true,
-    expires: new Date(Date.now() + oneDay),
-  });
-  res.status(StatusCodes.CREATED).json({ user: tokenUser });
+  const tokenUser = createTokenUser(user);
+  attachCookiesToResponse({ res, user: tokenUser });
+  res.status(201).json({ user });
 };
 
 const login = async (req, res) => {
-  res.send("login");
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new CustomAPIError.BadRequestError(
+      "Please provide email and password"
+    );
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new CustomAPIError.UnauthenticatedError("Invalid Credentials");
+  }
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new CustomAPIError.UnauthenticatedError("Invalid Credentials");
+  }
+  const tokenUser = createTokenUser(user);
+  attachCookiesToResponse({ res, user: tokenUser });
+  res.status(200).json({ user });
 };
 
 const logout = async (req, res) => {
-  res.send("logout");
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ msg: "user has logged out" });
 };
 
 module.exports = {
