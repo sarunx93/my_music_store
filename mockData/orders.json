@@ -1,0 +1,35 @@
+[
+  {
+    "tax": 399,
+    "shippingFee": 499,
+    "items": [
+      {
+        "name": "mapex drum pedals",
+        "price": 0,
+        "image": "/upload/example.jpeg",
+        "amount": 3,
+        "product": "62b140541e8f3aaafbf30b39"
+      }
+    ]
+  },
+  {
+    "tax": 399,
+    "shippingFee": 499,
+    "items": [
+      {
+        "name": "Ibanez RGD",
+        "price": 10000,
+        "image": "https://www.portmacguitars.com.au/assets/full/6043147.jpg",
+        "amount": 1,
+        "product": "62b2bed6a3dfc2e457f8a67e"
+      },
+      {
+        "name": "Music Man Majesty",
+        "price": 19000,
+        "image": "https://images.static-thomann.de/pics/bdb/491612/15109128_800.jpg",
+        "amount": 1,
+        "product": "62b2bf23a3dfc2e457f8a680"
+      }
+    ]
+  }
+]

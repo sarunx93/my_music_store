@@ -69,4 +69,14 @@ const ProductShcema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+ProductShcema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "product",
+  justOne: false,
+});
+
+ProductShcema.pre("remove", async function (next) {
+  await this.model("Review").deleteMany({ product: this._id });
+});
 module.exports = mongoose.model("Product", ProductShcema);
